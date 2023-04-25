@@ -14,48 +14,61 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.saksoftCRUD.Converter.EmployeeConverter;
+import com.saksoftCRUD.Dto.EmployeeDto;
 import com.saksoftCRUD.Entity.Employee;
 import com.saksoftCRUD.Service.EmployeeServiceInterface;
 
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
-	
+
 	@Autowired
 	private EmployeeServiceInterface employeeServiceInterface;
-	
+
+	@Autowired
+	private EmployeeConverter employeeConverter;
+
 	@PostMapping("/save")
-	public ResponseEntity<Employee> addEmployee(@RequestBody Employee employee){
+	public ResponseEntity<EmployeeDto> addEmployee(@RequestBody EmployeeDto employeeDto) {
+
+		Employee employee = employeeConverter.dtoToEntity(employeeDto);
+
 		Employee employeeSaved = employeeServiceInterface.addEmployee(employee);
-		return new ResponseEntity<Employee>(employeeSaved, HttpStatus.CREATED);
+		EmployeeDto entityToDtoEmp = employeeConverter.entityToDto(employeeSaved);
+		return new ResponseEntity<EmployeeDto>(entityToDtoEmp, HttpStatus.CREATED);
 	}
-	
+
 	@GetMapping("/all")
-	public ResponseEntity<List<Employee>> getAllEmployees(){
-		
+	public ResponseEntity<List<EmployeeDto>> getAllEmployees() {
+
 		List<Employee> listOfAllEmps = employeeServiceInterface.getAllEmployees();
-		return new ResponseEntity<List<Employee>>(listOfAllEmps, HttpStatus.OK);
+		List<EmployeeDto> entityToDtoList = employeeConverter.entityToDto(listOfAllEmps);
+		return new ResponseEntity<List<EmployeeDto>>(entityToDtoList, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/emp/{empid}")
-	public ResponseEntity<Employee> getEmpById(@PathVariable("empid") Long empidL){
-		
+	public ResponseEntity<EmployeeDto> getEmpById(@PathVariable("empid") Long empidL) {
+
 		Employee empRetrieved = employeeServiceInterface.getEmpById(empidL);
-		return new ResponseEntity<Employee>(empRetrieved, HttpStatus.OK);
+		EmployeeDto entityToDtoEmployee = employeeConverter.entityToDto(empRetrieved);
+		return new ResponseEntity<EmployeeDto>(entityToDtoEmployee, HttpStatus.OK);
 	}
-	
+
 	@DeleteMapping("/delete/{empid}")
-	public ResponseEntity<Void> deleteEmpById(@PathVariable("empid") Long empidL){
-		
+	public ResponseEntity<Void> deleteEmpById(@PathVariable("empid") Long empidL) {
+
 		employeeServiceInterface.deleteEmpById(empidL);
 		return new ResponseEntity<Void>(HttpStatus.ACCEPTED);
 	}
-	
-	@PutMapping("/update")
-	public ResponseEntity<Employee> updateEmployee(@RequestBody Employee employee){
-		Employee employeeSaved = employeeServiceInterface.addEmployee(employee);
-		return new ResponseEntity<Employee>(employeeSaved, HttpStatus.CREATED);
-	}
 
+	@PutMapping("/update")
+	public ResponseEntity<EmployeeDto> updateEmployee(@RequestBody EmployeeDto employeeDto) {
+		Employee employee = employeeConverter.dtoToEntity(employeeDto);
+		Employee employeeSaved = employeeServiceInterface.addEmployee(employee);
+		EmployeeDto entityToDtoEmployeeDto = employeeConverter.entityToDto(employeeSaved);
+		
+		return new ResponseEntity<EmployeeDto>(entityToDtoEmployeeDto, HttpStatus.CREATED);
+	}
 
 }
